@@ -29,8 +29,7 @@
     "publish:beta": "npm publish --tag beta",
     "publish:canary": "npm publish --tag canary",
     "lint": "standard",
-    "lint:fix": "standard --fix",
-    "precommit": "build"
+    "lint:fix": "standard --fix"
   },
   "files": [
     "dist",
