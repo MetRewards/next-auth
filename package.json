@@ -30,7 +30,7 @@
     "publish:canary": "npm publish --tag canary",
     "lint": "standard",
     "lint:fix": "standard --fix",
-    "prepare": "npm run build"
+    "precommit": "build"
   },
   "files": [
     "dist",
