@@ -118,7 +118,7 @@ var getToken = function () {
   var _ref3 = _asyncToGenerator(function* (args) {
     var {
       req,
-      secureCookie = !(!process.env.NEXTAUTH_URL || process.env.NEXTAUTH_URL.startsWith('http://')),
+      secureCookie = process.env.VERCEL_URL || !(!process.env.NEXTAUTH_URL || process.env.NEXTAUTH_URL.startsWith('http://')),
       cookieName = secureCookie ? '__Secure-next-auth.session-token' : 'next-auth.session-token',
       raw = false
     } = args;
