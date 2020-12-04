@@ -67,11 +67,13 @@ const decode = async ({
   },
   encryption = DEFAULT_ENCRYPTION_ENABLED
 } = {}) => {
+  console.log('decoding part', token)
   if (!token) return null
 
   let tokenToVerify = token
 
   if (encryption) {
+    console.log('encryption', encryption);
     // Encryption Key
     const _encryptionKey = (decryptionKey)
       ? jose.JWK.asKey(JSON.parse(decryptionKey))
@@ -79,6 +81,7 @@ const decode = async ({
 
     // Decrypt token
     const decryptedToken = jose.JWE.decrypt(token, _encryptionKey, decryptionOptions)
+    console.log('decryptedToken', decryptedToken);
     tokenToVerify = decryptedToken.toString('utf8')
   }
 
@@ -86,6 +89,11 @@ const decode = async ({
   const _signingKey = (verificationKey)
     ? jose.JWK.asKey(JSON.parse(verificationKey))
     : getDerivedSigningKey(secret)
+
+    console.log('attempting to sign decode key')
+
+    const verifyToken = jose.JWT.verify(tokenToVerify, _signingKey, verificationOptions)
+    console.log('verifyToken', verifyToken);
 
   // Verify token
   return jose.JWT.verify(tokenToVerify, _signingKey, verificationOptions)
@@ -101,9 +109,15 @@ const getToken = async (args) => {
     raw = false
   } = args
   if (!req) throw new Error('Must pass `req` to JWT getToken()')
-
+  console.log('secureCookie', secureCookie);
+  console.log('cookieName', cookieName);
+  console.log('req', req.cookies);
+  console.log('process.env.VERCEL_URL', process.env.VERCEL_URL)
+  
   // Try to get token from cookie
   let token = req.cookies[cookieName]
+  console.log('token', token);
+  console.log('step 1')
 
   // If cookie not found in cookie look for bearer token in authorization header.
   // This allows clients that pass through tokens in headers rather than as
@@ -113,10 +127,14 @@ const getToken = async (args) => {
     token = decodeURIComponent(urlEncodedToken)
   }
 
+  console.log('step 2')
+
   if (raw) {
     return token
   }
 
+
+  console.log('step 3')
   try {
     return await decode({ token, ...args })
   } catch (error) {

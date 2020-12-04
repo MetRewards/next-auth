@@ -84,19 +84,28 @@ var decode = function () {
       },
       encryption = DEFAULT_ENCRYPTION_ENABLED
     } = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    console.log('decoding part', token);
     if (!token) return null;
     var tokenToVerify = token;
 
     if (encryption) {
+      console.log('encryption', encryption);
+
       var _encryptionKey = decryptionKey ? _jose.default.JWK.asKey(JSON.parse(decryptionKey)) : getDerivedEncryptionKey(secret);
 
       var decryptedToken = _jose.default.JWE.decrypt(token, _encryptionKey, decryptionOptions);
 
+      console.log('decryptedToken', decryptedToken);
       tokenToVerify = decryptedToken.toString('utf8');
     }
 
     var _signingKey = verificationKey ? _jose.default.JWK.asKey(JSON.parse(verificationKey)) : getDerivedSigningKey(secret);
 
+    console.log('attempting to sign decode key');
+
+    var verifyToken = _jose.default.JWT.verify(tokenToVerify, _signingKey, verificationOptions);
+
+    console.log('verifyToken', verifyToken);
     return _jose.default.JWT.verify(tokenToVerify, _signingKey, verificationOptions);
   });
 
@@ -114,16 +123,26 @@ var getToken = function () {
       raw = false
     } = args;
     if (!req) throw new Error('Must pass `req` to JWT getToken()');
+    console.log('secureCookie', secureCookie);
+    console.log('cookieName', cookieName);
+    console.log('req', req.cookies);
+    console.log('process.env.VERCEL_URL', process.env.VERCEL_URL);
     var token = req.cookies[cookieName];
+    console.log('token', token);
+    console.log('step 1');
 
     if (!token && req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
       var urlEncodedToken = req.headers.authorization.split(' ')[1];
       token = decodeURIComponent(urlEncodedToken);
     }
 
+    console.log('step 2');
+
     if (raw) {
       return token;
     }
+
+    console.log('step 3');
 
     try {
       return yield decode(_objectSpread({
